@@ -1,0 +1,16 @@
+
+docker build -f Dockerfile_job -t data_processing_job:1.0 .
+
+-f telling Docker which file to use (since we used Dockerfile_job)
+
+-t defines a tag for the image (name:version)
+
+. is the path where code files are located, set current folder with .
+
+docker images
+
+docker run --name data_processing data_processing_job:1.0
+
+docker ps -a
+
+docker rm data_processing

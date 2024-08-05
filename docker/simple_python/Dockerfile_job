@@ -1,0 +1,8 @@
+# Base image to use
+FROM python:3.11.6-slim
+# Install pandas library 
+RUN pip3 install pandas
+# Copies the local run.py file into the container
+COPY run.py /run.py
+# Sets the default command to run when the container starts to execute the run.py script
+CMD python3 /run.py

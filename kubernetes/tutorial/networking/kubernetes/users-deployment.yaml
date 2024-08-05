@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: users
+          image: jpcaico/kub-demo-users:latest
+          env:
+            - name: AUTH_ADDRESS
+              #value: "10.108.216.129"
+              value: "auth-service.default"
+
+

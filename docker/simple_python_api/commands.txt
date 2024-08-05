@@ -1,0 +1,12 @@
+uvicorn api.main:app --host 0.0.0.0 --port 8087
+
+
+docker build -t my_api:1.0 .
+
+docker run -p 8087:8087 -d --rm --name api my_api:1.0
+
+docker ps -a
+
+docker logs api
+
+docker stop api
