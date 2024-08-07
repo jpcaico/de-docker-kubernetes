@@ -20,13 +20,60 @@ Produce messages
 3. create a topic with kafka-topics.sh by specifying the bootstrap server, topic name, number of partitions and replication factors - the last two are optional
 `cd /opt/bitnami/kafka/bin/`
 
+
+### Create a topic
 ```
 ./kafka-topics.sh \
    --bootstrap-server localhost:9092 --create \
    --topic orders --partitions 3 --replication-factor 3
 ```
 
+```
+./kafka-topics.sh \
+   --bootstrap-server localhost:9092 --create \
+   --topic newtopic --partitions 3 --replication-factor 1
+```
+
+`./kafka-topics.sh --zookeeper zookeeper:2181 --list`
+`./kafka-topics.sh --bootstrap-server localhost:9092 --list`
+`./kafka-topics.sh --describe --topic orders --bootstrap-server localhost:9092`
+`./kafka-topics.sh --describe --topic newtopic --bootstrap-server localhost:9092`
+
+**Altering topic**
+```
+./kafka-topics.sh \
+   --bootstrap-server localhost:9092 --alter \
+   --topic newtopic --partitions 4 
+```
+
+`cd /bitnami/kafka/data/newtopic-0`
+
+**Delete topic**
+
+```
+./kafka-topics.sh \
+   --bootstrap-server localhost:9092 --delete \
+   --topic newtopic
+```
+
+### Produce messages
 4. Produce messages with `kafka-console-producer.sh`
+
+```
+./kafka-topics.sh \
+   --bootstrap-server localhost:9092 --create \
+   --topic messages --partitions 3 --replication-factor 1
+```
+
+```
+./kafka-console-producer.sh \
+--bootstrap-server localhost:9092 --topic messages
+```
+
+```
+./kafka-console-producer.sh \
+--bootstrap-server localhost:9092 --topic orders
+```
 
 ```
 ./kafka-console-producer.sh \
@@ -36,6 +83,7 @@ Produce messages
 >product: lemons, quantity:7
 ```
 
+### Consume messages
 Consume messages
 
 1. Use `kafka-console-consumer.sh` to consume messages
@@ -46,6 +94,72 @@ Consume messages
 ./kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 --topic orders --from-beginning
 
+```
+
+```
+./kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic messages --from-beginning
+
+```
+
+```
+./kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic messages --partition 0 --offset 2
+
+```
+
+```
+./kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic messages --partition 0 --offset 2 --max-messages 1
+ 
+ ``` 
+
+### Consumer groups
+Open it two consumer into two different terminals and generate messages to check the behavior.
+```
+./kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic messages --group message_consumers
+
+```
+add a new consumer group to the same topic
+
+```
+./kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 --topic messages --group message_consumers_new
+```
+
+
+
+`./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --list`
+
+`./kafka-consumer-groups.sh --bootstrap-server localhost:9092 --describe --group message_consumers`
+
+Notice lag 0
+
+But now if we stop the consumers, and then generate more messages, and then describe again, we will notice the lag
+
+This will get from the beginning of the NON-READ offsets:
+```
+./kafka-console-consumer.sh   --bootstrap-server 
+localhost:9092 --topic messages --group message_consumers --from-beginning
+```
+
+If I really from the actual beginning, I need to set the offset I need.
+
+But if we describe again, we can see the lag back to 0 because we have a consumer that picked it up.
+
+Reseting the consumer group offsets:
+
+```
+./kafka-consumer-groups.sh   --bootstrap-server \
+localhost:9092 --topic messages --group message_consumers --reset-offsets --to-earliest --execute
+```
+
+Now it can pick it up from the actual beginning:
+
+```
+./kafka-console-consumer.sh   --bootstrap-server \
+localhost:9092 --topic messages --group message_consumers --from-beginning
 ```
 
 ### Note on Data Persistence
