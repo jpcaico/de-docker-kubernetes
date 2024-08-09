@@ -178,3 +178,31 @@ For the UI
 `docker-compose -f kafka-ui.yml up -d`
 
 `python3 producer.py`
+
+
+## Working with the clusters
+
+1. spin up all clusters
+2. docker exec -it kafka-0 bash
+3. docker exec -it kafka-1 bash
+4. docker exec -it kafka-2 bash
+
+In one of them
+`cd /opt/bitnami/kafka/bin`
+
+`./zookeeper-shell.sh zookeeper:2181`
+
+`ls /brokers/ids` - check brokers
+`get /brokers/ids/0`
+
+
+create topic with replication
+`./kafka-topics.sh --bootstrap-server localhost:9092 --topic events --create --partitions 3 --replication-factor 3`
+`./kafka-topics.sh --describe --topic events --bootstrap-server localhost:9092`
+
+
+create producer
+`./kafka-console-producer.sh --bootstrap-server localhost:9092 --topic events`
+
+create some consumers
+`./kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic events --group events_consumers`
