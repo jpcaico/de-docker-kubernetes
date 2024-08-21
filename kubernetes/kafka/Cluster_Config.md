@@ -22,7 +22,7 @@ We deploy the Kafka Cluster using the Strimzi Operator on a Minikube cluster.
 Minikube is a tool that allows you to run Kubernetes on your local machine. It's a personal, lightweight version of Kubernetes that you can use to test and experiment without needing a big server setup. Before you can run Kafka on Kubernetes, you need to set up a Kubernetes environment. Since you’re working on your local machine, you use Minikube for this purpose.
 
 
-`minikube start --cpus='max' --memory=10240 --addons=metrics-server --kubernetes-version=v1.27.0`
+`minikube start --cpus='max' --memory=10240 --addons=metrics-server --kubernetes-version=v1.25.3`
 
 ### Deploy Strimzi Operator
 
@@ -73,11 +73,11 @@ Kafka Cluster is essentially a group of Kafka brokers working together to manage
 
 
 - Deploy a Kafka cluster with two brokers and one Zookeeper node. It has both internal and external listeners on port 9092 and 29092 respectively.
-- The external listener is configured as the nodeport type so that the associating service can be accessed from the host machine.
+- The external listener is configured as the loadbalancer type so that the associating service can be accessed from the host machine.
 - Cluster is configured to allow automatic creation of topics (auto.create.topics.enable: “true”) and the default number of partition is set to 3 (num.partitions: 3).
 
 > **Internal Listener (port: 9092)**: This is used for communication within the Kubernetes cluster, where different parts of your system can talk to Kafka.
-> **External Listener (port: 29092)**: This is set up as a NodePort, which allows your Kafka cluster to be accessed from outside the Kubernetes cluster (like from your laptop or another machine). This is useful when you need to send or receive data from Kafka while working on your local machine.
+> **External Listener (port: 29092)**: This is set up as a loadbalancer, which allows your Kafka cluster to be accessed from outside the Kubernetes cluster (like from your laptop or another machine). This is useful when you need to send or receive data from Kafka while working on your local machine.
 
 
 Run
@@ -105,7 +105,7 @@ demo-cluster-kafka-external-bootstrap - to access Kafka brokers from the client 
 
 ### Deploy Kafka UI
 
-UI for Apache Kafka (kafka-ui) is a free and open-source Kafka management application, and it is deployed as a Kubernetes Deployment. The Deployment is configured to have a single instance, and the Kafka cluster access details are specified as environment variables. The app is associated by a service of the NodePort type for external access.
+UI for Apache Kafka (kafka-ui) is a free and open-source Kafka management application, and it is deployed as a Kubernetes Deployment. The Deployment is configured to have a single instance, and the Kafka cluster access details are specified as environment variables. The app is associated by a service of the loadBalancer type for external access.
 
 `kubectl create -f manifests/kafka-ui.yaml`
 
@@ -114,6 +114,21 @@ UI for Apache Kafka (kafka-ui) is a free and open-source Kafka management applic
 We can use the minikube service command to obtain the Kubernetes URL for the kafka-ui service.
 
 `minikube service kafka-ui --url`
+
+
+### Acessing it externally
+
+- We need to initiate the minikube tunnel:
+`minikube tunnel`
+
+- Get the boostrap external IP:
+`kubectl get svc`
+
+Use the external IP to run the consumers and producers.
+
+- `BOOTSTRAP_SERVERS=127.0.0.1:29092 python3 clients/producer.py`
+- `BOOTSTRAP_SERVERS=127.0.0.1:29092 python3 clients/consumer.py`
+
 
 
 ### Delete Resources
@@ -167,3 +182,5 @@ kubectl run kafka-producer --image=quay.io/strimzi/kafka:0.27.1-kafka-2.8.1 --rm
 kubectl run kafka-consumer --image=quay.io/strimzi/kafka:0.27.1-kafka-2.8.1 --rm -it --restart=Never \
 -- bin/kafka-console-consumer.sh --bootstrap-server demo-cluster-kafka-bootstrap:9092 --topic demo-topic --from-beginning
 ```
+
+

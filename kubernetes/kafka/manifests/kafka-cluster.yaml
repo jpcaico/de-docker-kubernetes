@@ -1,11 +1,19 @@
+# kafka/manifests/kafka-cluster.yaml
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
   name: demo-cluster
 spec:
   kafka:
-    replicas: 2
     version: 3.5.2
+    replicas: 1
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
     listeners:
       - name: plain
         port: 9092
@@ -13,7 +21,7 @@ spec:
         tls: false
       - name: external
         port: 29092
-        type: nodeport
+        type: loadbalancer
         tls: false
     storage:
       type: jbod
@@ -28,12 +36,20 @@ spec:
       transaction.state.log.min.isr: 1
       default.replication.factor: 1
       min.insync.replicas: 1
-      inter.broker.protocol.version: 3.5
+      inter.broker.protocol.version: "3.5"
       auto.create.topics.enable: "true"
       num.partitions: 3
   zookeeper:
     replicas: 1
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+      limits:
+        memory: 512Mi
+        cpu: 500m
     storage:
       type: persistent-claim
       size: 10Gi
       deleteClaim: true
+

@@ -1,4 +1,4 @@
-# manifests/kafka-ui.yaml
+# kafka/manifests/kafka-ui.yaml
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,7 +6,7 @@ metadata:
     app: kafka-ui
   name: kafka-ui
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 8080
       targetPort: 8080
@@ -41,4 +41,10 @@ spec:
               value: demo-cluster-kafka-bootstrap:9092
             - name: KAFKA_CLUSTERS_0_ZOOKEEPER
               value: demo-cluster-zookeeper-client:2181
-          resources: {}
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
+              memory: 512Mi
+              cpu: 500m
