@@ -2,11 +2,11 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
-  name: demo-cluster
+  name: demo-cluster-nodeport
 spec:
   kafka:
     version: 3.5.2
-    replicas: 1
+    replicas: 2
     resources:
       requests:
         memory: 256Mi
@@ -21,7 +21,7 @@ spec:
         tls: false
       - name: external
         port: 29092
-        type: loadbalancer
+        type: nodeport
         tls: false
     storage:
       type: jbod

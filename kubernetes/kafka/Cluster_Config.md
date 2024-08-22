@@ -81,7 +81,7 @@ Kafka Cluster is essentially a group of Kafka brokers working together to manage
 
 
 Run
-`kubectl create -f manifests/kafka-cluster.yaml`
+`kubectl create -f manifests/kafka-cluster-loadbalancer.yaml`
 
 When the Kafka and Zookeeper nodes are deployed, Kubernetes uses something called StatefulSets. Here’s why:
 
@@ -103,20 +103,8 @@ communication from host
 demo-cluster-kafka-external-bootstrap - to access Kafka brokers from the client apps
 ```
 
-### Deploy Kafka UI
 
-UI for Apache Kafka (kafka-ui) is a free and open-source Kafka management application, and it is deployed as a Kubernetes Deployment. The Deployment is configured to have a single instance, and the Kafka cluster access details are specified as environment variables. The app is associated by a service of the loadBalancer type for external access.
-
-`kubectl create -f manifests/kafka-ui.yaml`
-
-`kubectl get all -l app=kafka-ui`
-
-We can use the minikube service command to obtain the Kubernetes URL for the kafka-ui service.
-
-`minikube service kafka-ui --url`
-
-
-### Acessing it externally
+### Acessing it externally (loadbalancer)
 
 - We need to initiate the minikube tunnel:
 `minikube tunnel`
@@ -130,14 +118,30 @@ Use the external IP to run the consumers and producers.
 - `BOOTSTRAP_SERVERS=127.0.0.1:29092 python3 clients/consumer.py`
 
 
+### Deploy Kafka UI
+
+UI for Apache Kafka (kafka-ui) is a free and open-source Kafka management application, and it is deployed as a Kubernetes Deployment. The Deployment is configured to have a single instance, and the Kafka cluster access details are specified as environment variables. The app is associated by a service of the loadBalancer type for external access.
+
+`kubectl create -f manifests/kafka-ui.yaml`
+
+`kubectl get all -l app=kafka-ui`
+
+We can use the minikube service command to obtain the Kubernetes URL for the kafka-ui service.
+
+`minikube service kafka-ui --url`
+
+
+
+
+
 
 ### Delete Resources
 The Kubernetes resources and Minikube cluster can be removed by the kubectl delete and minikube delete commands respectively.
 
 
-`kubectl delete -f manifests/kafka-cluster.yaml`
+`kubectl delete -f manifests/kafka-cluster-loadbalancer.yaml`
 `kubectl delete -f manifests/kafka-ui.yaml`
-`kubectl delete -f manifests/strimzi-cluster-operator-$STRIMZI_VERSION.yaml`
+`kubectl delete -f manifests/strimzi-cluster-operator-0.39.0.yaml`
 `minikube delete`
 
 
